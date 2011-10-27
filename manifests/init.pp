@@ -67,7 +67,8 @@ define java::install ($version,$arch,$defaultJava=false) {
 	    site => "${url_base}",                                                                           
 	    cwd => $download_dir,                                                                                                                                              
 	    require => File[$download_dir],                                                                  
-	    user => "root",                                                                                                              
+	    user => "root",
+	    timeout => 300,                                                                                                              
 	}    
 	
 	# Update rigths
