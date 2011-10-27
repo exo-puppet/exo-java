@@ -82,29 +82,22 @@ define java::install ($version,$arch,$defaultJava=false) {
     
     # Extract and move it in
     exec{"extract-jdk-$name":
-		command => "$download_dir/${file}", 
+		command => "$download_dir/${file}; mv -f $download_dir/jdk1* $install_dir/jdk-${major}-linux-${arch}", 
 		cwd => $download_dir,
 		require => [File["$install_dir","$download_dir/${file}"],Package["g++-multilib"]],
 		onlyif => "test ! -d $install_dir/jdk-${major}-linux-${arch}",
 	}     	
 	
-	# Move it
-	exec{"move-jdk-$name":
-		command => "mv -f $download_dir/jdk1* $install_dir/jdk-${major}-linux-${arch}", 
-		require => [Exec["extract-jdk-$name"]],
-		onlyif => "test ! -d $install_dir/jdk-${major}-linux-${arch}",
-	}	
-
 	if($defaultJava){
 		#If marked as default register it using update-alternatives
 		exec{"update-alternatives-java-default-$name":
 			command => "update-alternatives --install /usr/bin/java java $install_dir/jdk-${major}-linux-${arch}/jre/bin/java 10000", 
-			require => [Exec["move-jdk-$name"]],
+			require => [Exec["extract-jdk-$name"]],
 		}			
 	}else{
 		exec{"update-alternatives-java-not-default-$name":
 			command => "update-alternatives --install /usr/bin/java java $install_dir/jdk-${major}-linux-${arch}/jre/bin/java 5000", 
-			require => [Exec["move-jdk-$name"]],
+			require => [Exec["extract-jdk-$name"]],
 		}			
 		
 	}
