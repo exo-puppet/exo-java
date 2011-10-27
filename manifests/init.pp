@@ -108,15 +108,15 @@ define java::install ($version,$arch,$defaultJava=false) {
 	
     # Move it
     exec{"move-jdk-${major}-${arch}":
-		command => " mv -f $download_dir/jdk-${major}-${arch}/* $install_dir/jdk-${major}-sun-${arch}", 
+		command => "mv -f $download_dir/jdk-${major}-${arch}/jdk* $install_dir/jdk-${major}-sun-${arch}", 
 		cwd => "$download_dir/jdk-${major}-${arch}",
 		creates => "$install_dir/jdk-${major}-sun-${arch}",
-		require => [File["$install_dir"],Exec["remove-tmp-${file}","extract-jdk-${major}-${arch}"]],
+		require => [File["$install_dir"],Exec["remove-tmp-${file}"]],
 	}     	
 
     # Remove the tmp directory
 	exec {"remove-tmp-dir-jdk-${major}-${arch}":
-	command => "rm -rf $download_dir/jdk-${major}-${arch}",
+	    command => "rm -rf $download_dir/jdk-${major}-${arch}",
 	    require => Exec["move-jdk-${major}-${arch}"],
 	}
 	
