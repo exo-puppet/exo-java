@@ -38,8 +38,7 @@ define download_file(
         cwd => $cwd,
         creates => "${cwd}/${name}",                                                              
         require => $require,
-        user => $user,                      
-        onlyif => "test ! -f ${cwd}/${name}",  
+        user => $user,  
 	    timeout => 300,                                                                                          
     }
 
