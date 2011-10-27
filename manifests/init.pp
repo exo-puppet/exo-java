@@ -39,7 +39,8 @@ define download_file(
         creates => "${cwd}/${name}",                                                              
         require => $require,
         user => $user,                      
-        onlyif => "test ! -f ${cwd}/${name}",                                                                                    
+        onlyif => "test ! -f ${cwd}/${name}",  
+	    timeout => 300,                                                                                          
     }
 
 }
@@ -67,8 +68,7 @@ define java::install ($version,$arch,$defaultJava=false) {
 	    site => "${url_base}",                                                                           
 	    cwd => $download_dir,                                                                                                                                              
 	    require => File[$download_dir],                                                                  
-	    user => "root",
-	    timeout => 300,                                                                                                              
+	    user => "root",                                                                                                              
 	}    
 	
 	# Update rigths
