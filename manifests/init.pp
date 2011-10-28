@@ -5,7 +5,7 @@ class java::default {
 	Exec { path => "/bin:/sbin:/usr/bin:/usr/sbin" }
 	
 	# Create a Download directory (and all parents if necessary - puppet don't allow mkdir -p :( )
-	file {["/home/download","/home/download/jvm",$download_dir]:
+	file {["/home/download/jvm",$download_dir]:
 	    ensure => directory,
 	    owner   => root,
 	    group   => root,
