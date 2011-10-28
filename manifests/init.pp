@@ -128,13 +128,13 @@ define java::install ($version,$arch,$defaultJava=false) {
 		#If marked as default register it using update-alternatives
 		exec{"update-alternatives-java-default-$name":
 			command => "update-alternatives --install /usr/bin/java java $install_dir/jdk-${major}-sun-${arch}/jre/bin/java 10000", 
-			require => [Exec["remove-tmp-dir-jdk-${major}-${arch}"]],
+			subscribe => [Exec["move-jdk-${major}-${arch}"]],
 			refreshonly => true,
 		}			
 	}else{
 		exec{"update-alternatives-java-not-default-$name":
 			command => "update-alternatives --install /usr/bin/java java $install_dir/jdk-${major}-sun-${arch}/jre/bin/java 5000", 
-			require => [Exec["remove-tmp-dir-jdk-${major}-${arch}"]],
+			subscribe => [Exec["move-jdk-${major}-${arch}"]],
 			refreshonly => true,
 		}			
 		
