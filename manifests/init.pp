@@ -83,6 +83,7 @@ define java::install ($version,$arch,$defaultJava=false) {
 		command => "mkdir -p $download_dir/jdk-${major}-${arch}",
 	    creates => "$download_dir/jdk-${major}-${arch}",
 	    require => File["$download_dir/${file}"],
+		onlyif => "test ! -d $install_dir/jdk-${major}-sun-${arch}",	    
 	}
 	
 	# Copy the binary
@@ -90,6 +91,7 @@ define java::install ($version,$arch,$defaultJava=false) {
 		command => "cp -f $download_dir/${file} $download_dir/jdk-${major}-${arch}/${file}",
 	    creates => "$download_dir/jdk-${major}-${arch}/${file}",
 	    require => Exec["create-tmp-dir-jdk-${major}-${arch}"],
+		onlyif => "test ! -d $install_dir/jdk-${major}-sun-${arch}",	    
 	}
 	    
     # Extract it
@@ -97,13 +99,14 @@ define java::install ($version,$arch,$defaultJava=false) {
 		command => "$download_dir/jdk-${major}-${arch}/${file}", 
 		cwd => "$download_dir/jdk-${major}-${arch}",
 		require => [Exec["copy-jdk-${major}-${arch}"],Package["g++-multilib"]],
-		onlyif => "test ! -d $install_dir/jdk-${major}-linux-${arch}",
+		onlyif => "test ! -d $install_dir/jdk-${major}-sun-${arch}",
 	}     	
 
     # Remove the archive
 	exec {"remove-tmp-${file}":
 		command => "rm -f $download_dir/jdk-${major}-${arch}/${file}", 
 	    require => Exec["extract-jdk-${major}-${arch}"],
+		onlyif => "test -f $download_dir/jdk-${major}-${arch}/${file}",	    
 	}
 	
     # Move it
@@ -111,13 +114,14 @@ define java::install ($version,$arch,$defaultJava=false) {
 		command => "mv -f $download_dir/jdk-${major}-${arch}/jdk* $install_dir/jdk-${major}-sun-${arch}", 
 		cwd => "$download_dir/jdk-${major}-${arch}",
 		creates => "$install_dir/jdk-${major}-sun-${arch}",
-		require => [File["$install_dir"],Exec["remove-tmp-${file}"]],
+		require => [File["$install_dir"],Exec["remove-tmp-${file}"]],		
 	}     	
 
     # Remove the tmp directory
 	exec {"remove-tmp-dir-jdk-${major}-${arch}":
 	    command => "rm -rf $download_dir/jdk-${major}-${arch}",
 	    require => Exec["move-jdk-${major}-${arch}"],
+		onlyif => "test -d $download_dir/jdk-${major}-${arch}",
 	}
 	
 	if($defaultJava){
@@ -125,11 +129,13 @@ define java::install ($version,$arch,$defaultJava=false) {
 		exec{"update-alternatives-java-default-$name":
 			command => "update-alternatives --install /usr/bin/java java $install_dir/jdk-${major}-sun-${arch}/jre/bin/java 10000", 
 			require => [Exec["remove-tmp-dir-jdk-${major}-${arch}"]],
+			refreshonly => true,
 		}			
 	}else{
 		exec{"update-alternatives-java-not-default-$name":
 			command => "update-alternatives --install /usr/bin/java java $install_dir/jdk-${major}-sun-${arch}/jre/bin/java 5000", 
 			require => [Exec["remove-tmp-dir-jdk-${major}-${arch}"]],
+			refreshonly => true,
 		}			
 		
 	}
