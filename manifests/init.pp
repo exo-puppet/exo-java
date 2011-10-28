@@ -9,6 +9,7 @@ class java::default {
 	    ensure => directory,
 	    owner   => root,
 	    group   => root,
+	    require => File["/home/download"],
 	}
 	
 	# Create a directory to extract jvms (and all parents if necessary - puppet dont allow mkdir -p :( )
