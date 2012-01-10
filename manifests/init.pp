@@ -40,7 +40,7 @@ define download_file(
         creates => "${cwd}/${name}",                                                              
         require => $require,
         user => $user,  
-	    timeout => 300,                                                                                          
+	    timeout => 0,                                                                                          
     }
 
 }
