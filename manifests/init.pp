@@ -7,8 +7,6 @@ class java::default {
 	# Create a Download directory (and all parents if necessary - puppet don't allow mkdir -p :( )
 	file {["/home/download/jvm",$download_dir]:
 	    ensure => directory,
-	    owner   => root,
-	    group   => root,
 	    require => File["/home/download"],
 	}
 	
@@ -67,14 +65,11 @@ define java::install ($version,$arch,$defaultJava=false) {
 	    site => "${url_base}",                                                                           
 	    cwd => $download_dir,                                                                                                                                              
 	    require => File[$download_dir],                                                                  
-	    user => "root",                                                                                                              
 	}    
 	
 	# Update rigths
 	file {"$download_dir/${file}":
         ensure => file,
-        owner   => root,
-        group   => root,
         mode    => 755,
         require => Exec["${file}"], 
     }	
