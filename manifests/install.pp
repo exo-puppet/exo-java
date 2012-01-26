@@ -1,56 +1,139 @@
-# Class: java::install
+################################################################################
 #
-# This class manages the installation of the java package
-class java::install {
+#   This module manages the SUN/sun Java JDK installation.
+#
+#   Tested platforms:
+#    - Ubuntu 11.04 Natty
+#
+# == Parameters
+#
+# [+editor+]
+#   (OPTIONAL) (default: sun) 
+#   
+#   this variable allows to select the vendor of the jvm (values: sun. TODO : ibm, jrockit, openjdk)
+#
+# [+version+]
+#   
+#   this variable allows to choose the version of the JDK to install
+#
+# [+arch+]
+#   
+#   this variable allows to choose the architecture of the package to install (values : "x64" or "i586" for java 6 and "amd64" or "i586" for java 5)
+#
+# [+defaultJava+]
+#   (OPTIONAL) (default: false) 
+#   
+#   this variable allows to activate this java version by default on your system. 
+#
+# == Modules Dependencies
+#
+# [+wget+]
+#   the +wget+ puppet module is used to download java packages (java::install)
+#
+# == Examples
+#
+#    java::install {
+#        "sun-java6-i586" :
+#            version => "6u30-b12",
+#            arch => "i586",
+#            defaultJava => true,
+#    }
+#
+################################################################################
+define java::install ($vendor = "sun", $version, $arch, $defaultJava = false) {
+
     Exec { path => "/bin:/sbin:/usr/bin:/usr/sbin" }
-    file {
-        ["${java::params::install_dir}",
-        "${java::params::install_dir}/${java::vendor}",
-        "${java::params::install_dir}/${java::vendor}/${java::params::arch_dir}"] :
-            ensure => directory,
+    
+    include java::params, java::config
+    include wget
+
+    if !($vendor in ["sun"]) {
+        fail('unknow java vendor $vendor . Please use "sun".')
     }
-    file {
-        "${java::params::download_dir}" :
-            ensure => directory,
-    } ->
+    if !($arch in ["x64", "amd64", "i586"]) {
+        fail('unknow architecture $arch . Please use "x64" or "i586" for java 6 and "amd64" or "i586" for java 5')
+    }
+
+    $installDir = "${java::params::installRootDir}/jdk-${vendor}-${version}-${arch}"
+
+    case $vendor {
+        /(sun)/ : {
+           # Extract the major version removing the beta 
+            $major = inline_template("<%= scope.lookupvar('version').split('-')[0].gsub('.', '_') %>")
+            $file = "jdk-${major}-linux-${arch}.bin"
+            $url = "http://download.oracle.com/otn-pub/java/jdk/${version}/${file}"
+            $jdk_dir = "jdk-${major}-sun-${arch}"
+        }
+        default : {
+            fail("The ${vendor} vendor is not supported")
+        }
+    }
+    if ($defaultJava) {
+        $priority = 10000
+    }
+    else {
+        $priority = 5000
+    }
+    
+    Class["java::params"] -> Class["java::config"] ->   
     # Download the archive
     wget::fetch {
-        "download-java-installer" :
-            source_url => "${java::params::url}",
-            target_directory => "${java::params::download_dir}",
-            target_file => "${java::params::file}",
+        "download-java-installer-${vendor}-${version}-${arch}" :
+            source_url => "${url}",
+            target_directory => "${java::params::downloadDir}",
+            target_file => "${file}",
+            require => File["$java::params::downloadDir"],
     } ->
     # Fix archive rights
     file {
-        "${java::params::download_dir}/${java::params::file}" :
+        "${java::params::downloadDir}/${file}" :
             ensure => present,
             mode => 755,
     } ->
-    # Copy file
-    exec {"copy-jdk-${java::vendor}-${java::version}-${java::arch}":
-        command => "cp -f ${java::params::download_dir}/${java::params::file} ${java::params::install_dir}/${java::vendor}/${java::params::arch_dir}/${java::params::file}",
-        creates => "${java::params::install_dir}/${java::vendor}/${java::params::arch_dir}/${java::params::file}",
-        unless => "/usr/bin/test -d ${java::params::install_dir}/${java::vendor}/${java::params::arch_dir}/${java::params::jdk_dir}",
+    # Generates installer script
+    file {
+        "${java::params::downloadDir}/puppet-install-java-${vendor}-${version}-${arch}.sh" :
+            ensure => file,
+            owner => root,
+            group => root,
+            mode => 0744,
+            content => template("java/puppet-install-java.sh.erb"),
     } ->
-    # Packaged required by the installer
-    package{
-        "g++-multilib":
-        ensure => installed,
-    } ->
-    # Extract it
-    exec{"extract-jdk-${java::vendor}-${java::version}-${java::arch}":
-        command => "${java::params::install_dir}/${java::vendor}/${java::params::arch_dir}/${java::params::file}", 
-        cwd => "${java::params::install_dir}/${java::vendor}/${java::params::arch_dir}",
-        unless => "test -d ${java::params::install_dir}/${java::vendor}/${java::params::arch_dir}/${java::params::jdk_dir}",
-    } ->      
-    # Remove the archive
-    exec {"remove-tmp-${java::vendor}-${java::version}-${java::arch}":
-        command => "rm -f ${java::params::install_dir}/${java::vendor}/${java::params::arch_dir}/${java::params::file}", 
-        onlyif => "test -f ${java::params::install_dir}/${java::vendor}/${java::params::arch_dir}/${java::params::file}",     
-    } ->    
-    #If marked as default register it using update-alternatives
-    exec{"update-alternatives-java-default-${java::vendor}-${java::version}-${java::arch}":
-        command => "update-alternatives --install /usr/bin/java java ${java::params::install_dir}/${java::vendor}/${java::params::arch_dir}/${java::params::file}/${java::params::jdk_dir}/jre/bin/java ${java::params::priority}", 
-        refreshonly => true,
+    # Process the installation
+    exec{"puppet-java-install-${vendor}-${version}-${arch}":
+        command => "${java::params::downloadDir}/puppet-install-java-${vendor}-${version}-${arch}.sh", 
+#        unless => "test -d ${installDir}",
     }
+    -> 
+    # Registers java using update-alternatives
+    exec{"update-alternatives-java-default-${vendor}-${version}-${arch}":
+        command => "update-alternatives --install /usr/bin/java java ${installDir}/jre/bin/java ${priority}", 
+    }    
+    -> 
+    # Registers javac using update-alternatives
+    exec{"update-alternatives-javac-default-${vendor}-${version}-${arch}":
+        command => "update-alternatives --install /usr/bin/javac javac ${installDir}/bin/javac ${priority}", 
+    }    
+    -> 
+    # Registers jhat using update-alternatives
+    exec{"update-alternatives-jhat-default-${vendor}-${version}-${arch}":
+        command => "update-alternatives --install /usr/bin/jhat jhat ${installDir}/bin/jhat ${priority}", 
+    }    
+    -> 
+    # Registers jstat using update-alternatives
+    exec{"update-alternatives-jstat-default-${vendor}-${version}-${arch}":
+        command => "update-alternatives --install /usr/bin/jstat jstat ${installDir}/bin/jstat ${priority}", 
+    }    
+    -> 
+    # Registers jps using update-alternatives
+    exec{"update-alternatives-jps-default-${vendor}-${version}-${arch}":
+        command => "update-alternatives --install /usr/bin/jps jps ${installDir}/bin/jps ${priority}", 
+    }    
+    -> 
+    # Registers jmap using update-alternatives
+    exec{"update-alternatives-jmap-default-${vendor}-${version}-${arch}":
+        command => "update-alternatives --install /usr/bin/jmap jmap ${installDir}/bin/jmap ${priority}", 
+    }    
+    
 }
+
