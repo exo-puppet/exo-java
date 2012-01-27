@@ -26,7 +26,7 @@ cd $PUPPET_JAVA_TMP_WORK
 cp $PUPPET_JAVA_DL_DIR/$PUPPET_JAVA_FILE .
 ./$PUPPET_JAVA_FILE
 mkdir -p "$(dirname $PUPPET_JAVA_INSTALL_DIR)"
-find . -type d -maxdepth 1 -exec mv {} $PUPPET_JAVA_INSTALL_DIR \;
+find . -mindepth 1 -maxdepth 1 -type d -exec cp -rf {} $PUPPET_JAVA_INSTALL_DIR \;
 
 cd -
 rm -rf $PUPPET_JAVA_TMP_WORK
