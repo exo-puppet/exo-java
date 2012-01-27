@@ -102,7 +102,7 @@ define java::install ($vendor = "sun", $version, $arch, $defaultJava = false) {
     # Process the installation
     exec{"puppet-java-install-${vendor}-${version}-${arch}":
         command => "${java::params::downloadDir}/puppet-install-java-${vendor}-${version}-${arch}.sh", 
-#        unless => "test -d ${installDir}",
+        unless => "test -d ${installDir}/jre/bin",
     }
     -> 
     # Registers java using update-alternatives
