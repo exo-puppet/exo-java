@@ -106,32 +106,32 @@ define java::install ($vendor = "sun", $version, $arch, $defaultJava = false) {
     }
     -> 
     # Registers java using update-alternatives
-    exec{"update-alternatives-java-default-${vendor}-${version}-${arch}":
+    exec{"puppet-java-update-alternatives-java-default-${vendor}-${version}-${arch}":
         command => "update-alternatives --install /usr/bin/java java ${installDir}/jre/bin/java ${priority}", 
     }    
     -> 
     # Registers javac using update-alternatives
-    exec{"update-alternatives-javac-default-${vendor}-${version}-${arch}":
+    exec{"puppet-java-update-alternatives-javac-default-${vendor}-${version}-${arch}":
         command => "update-alternatives --install /usr/bin/javac javac ${installDir}/bin/javac ${priority}", 
     }    
     -> 
     # Registers jhat using update-alternatives
-    exec{"update-alternatives-jhat-default-${vendor}-${version}-${arch}":
+    exec{"puppet-java-update-alternatives-jhat-default-${vendor}-${version}-${arch}":
         command => "update-alternatives --install /usr/bin/jhat jhat ${installDir}/bin/jhat ${priority}", 
     }    
     -> 
     # Registers jstat using update-alternatives
-    exec{"update-alternatives-jstat-default-${vendor}-${version}-${arch}":
+    exec{"puppet-java-update-alternatives-jstat-default-${vendor}-${version}-${arch}":
         command => "update-alternatives --install /usr/bin/jstat jstat ${installDir}/bin/jstat ${priority}", 
     }    
     -> 
     # Registers jps using update-alternatives
-    exec{"update-alternatives-jps-default-${vendor}-${version}-${arch}":
+    exec{"puppet-java-update-alternatives-jps-default-${vendor}-${version}-${arch}":
         command => "update-alternatives --install /usr/bin/jps jps ${installDir}/bin/jps ${priority}", 
     }    
     -> 
     # Registers jmap using update-alternatives
-    exec{"update-alternatives-jmap-default-${vendor}-${version}-${arch}":
+    exec{"puppet-java-update-alternatives-jmap-default-${vendor}-${version}-${arch}":
         command => "update-alternatives --install /usr/bin/jmap jmap ${installDir}/bin/jmap ${priority}", 
     }    
     
