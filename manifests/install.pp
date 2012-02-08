@@ -109,49 +109,42 @@ define java::install ($vendor = "sun", $version, $arch, $defaultJava = false) {
         command => "update-alternatives --install /usr/bin/java java ${installDir}/jre/bin/java ${priority}",
         subscribe => Exec["puppet-java-install-${vendor}-${version}-${arch}"], 
         creates => "/usr/bin/java",
-        refreshonly => true, 
     }    
     # Registers javac using update-alternatives
     exec{"puppet-java-update-alternatives-javac-default-${vendor}-${version}-${arch}":
         command => "update-alternatives --install /usr/bin/javac javac ${installDir}/bin/javac ${priority}", 
         subscribe => Exec["puppet-java-install-${vendor}-${version}-${arch}"], 
         creates => "/usr/bin/javac",
-        refreshonly => true, 
     }    
     # Registers jar using update-alternatives
     exec{"puppet-java-update-alternatives-jar-default-${vendor}-${version}-${arch}":
         command => "update-alternatives --install /usr/bin/jar jar ${installDir}/bin/jar ${priority}", 
         subscribe => Exec["puppet-java-install-${vendor}-${version}-${arch}"], 
         creates => "/usr/bin/jar",
-        refreshonly => true, 
     }    
     # Registers jhat using update-alternatives
     exec{"puppet-java-update-alternatives-jhat-default-${vendor}-${version}-${arch}":
         command => "update-alternatives --install /usr/bin/jhat jhat ${installDir}/bin/jhat ${priority}", 
         subscribe => Exec["puppet-java-install-${vendor}-${version}-${arch}"], 
         creates => "/usr/bin/jhat",
-        refreshonly => true, 
     }    
     # Registers jstat using update-alternatives
     exec{"puppet-java-update-alternatives-jstat-default-${vendor}-${version}-${arch}":
         command => "update-alternatives --install /usr/bin/jstat jstat ${installDir}/bin/jstat ${priority}", 
         subscribe => Exec["puppet-java-install-${vendor}-${version}-${arch}"], 
         creates => "/usr/bin/jstat",
-        refreshonly => true, 
     }    
     # Registers jps using update-alternatives
     exec{"puppet-java-update-alternatives-jps-default-${vendor}-${version}-${arch}":
         command => "update-alternatives --install /usr/bin/jps jps ${installDir}/bin/jps ${priority}", 
         subscribe => Exec["puppet-java-install-${vendor}-${version}-${arch}"], 
         creates => "/usr/bin/jps",
-        refreshonly => true, 
     }    
     # Registers jmap using update-alternatives
     exec{"puppet-java-update-alternatives-jmap-default-${vendor}-${version}-${arch}":
         command => "update-alternatives --install /usr/bin/jmap jmap ${installDir}/bin/jmap ${priority}", 
         subscribe => Exec["puppet-java-install-${vendor}-${version}-${arch}"],
         creates => "/usr/bin/jmap",
-        refreshonly => true, 
     }    
     
 }
