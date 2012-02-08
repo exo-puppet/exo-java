@@ -116,6 +116,12 @@ define java::install ($vendor = "sun", $version, $arch, $defaultJava = false) {
         subscribe => Exec["puppet-java-install-${vendor}-${version}-${arch}"], 
         refreshonly => true, 
     }    
+    # Registers jar using update-alternatives
+    exec{"puppet-java-update-alternatives-jar-default-${vendor}-${version}-${arch}":
+        command => "update-alternatives --install /usr/bin/jar jar ${installDir}/bin/jar ${priority}", 
+        subscribe => Exec["puppet-java-install-${vendor}-${version}-${arch}"], 
+        refreshonly => true, 
+    }    
     # Registers jhat using update-alternatives
     exec{"puppet-java-update-alternatives-jhat-default-${vendor}-${version}-${arch}":
         command => "update-alternatives --install /usr/bin/jhat jhat ${installDir}/bin/jhat ${priority}", 
