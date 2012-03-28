@@ -61,7 +61,7 @@ define java::install ($vendor = "sun", $version, $arch, $defaultJava = false) {
            # Extract the major version removing the beta 
             $major = inline_template("<%= scope.lookupvar('version').split('-')[0].gsub('.', '_') %>")
             $file = "jdk-${major}-linux-${arch}.bin"
-            $url = "http://download.oracle.com/otn-pub/java/jdk/${version}/${file}"
+            $url = "http://storage.exoplatform.org/public/java/jdk/sun/${version}/${file}"
             $jdk_dir = "jdk-${major}-sun-${arch}"
         }
         default : {
