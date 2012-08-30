@@ -139,5 +139,10 @@ define java::install ($vendor = "sun", $version, $arch, $defaultJava = false) {
         command => "update-alternatives --install /usr/bin/jmap jmap ${installDir}/bin/jmap ${priority}", 
         subscribe => Exec["puppet-java-install-${vendor}-${version}-${arch}"],
     }    
+    # Registers jstack using update-alternatives
+    exec{"puppet-java-update-alternatives-jstack-default-${vendor}-${version}-${arch}":
+        command => "update-alternatives --install /usr/bin/jstack jstack ${installDir}/bin/jstack ${priority}", 
+        subscribe => Exec["puppet-java-install-${vendor}-${version}-${arch}"],
+    }    
     
 }
