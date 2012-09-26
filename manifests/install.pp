@@ -103,7 +103,7 @@ define java::install ($vendor = "sun", $version, $arch, $defaultJava = false) {
 
   # Registers java using update-alternatives
   exec { "puppet-java-install-alternatives-java-${vendor}-${version}-${arch}":
-    command   => "update-alternatives --install /usr/bin/java java ${installDir}/jre/bin/java ${priority}",
+    command   => "update-alternatives --install /usr/bin/java java ${installDir}/bin/java ${priority}",
     subscribe => Exec["puppet-java-install-${vendor}-${version}-${arch}"],
   }
 
@@ -152,49 +152,49 @@ define java::install ($vendor = "sun", $version, $arch, $defaultJava = false) {
   if ($defaultJava) {
     # Set as default java using update-alternatives
     exec { "puppet-java-update-alternatives-java-default-${vendor}-${version}-${arch}":
-      command   => "update-alternatives --set java ${installDir}/jre/bin/java",
+      command   => "update-alternatives --set java ${installDir}/bin/java",
       subscribe => Exec["puppet-java-install-${vendor}-${version}-${arch}", 
         "puppet-java-install-alternatives-java-${vendor}-${version}-${arch}"],
     }
     # Set as default javac using update-alternatives
     exec { "puppet-java-update-alternatives-javac-default-${vendor}-${version}-${arch}":
-      command   => "update-alternatives --set javac ${installDir}/jre/bin/javac",
+      command   => "update-alternatives --set javac ${installDir}/bin/javac",
       subscribe => Exec["puppet-java-install-${vendor}-${version}-${arch}", 
         "puppet-java-install-alternatives-javac-${vendor}-${version}-${arch}"],
     }
     # Set as default jar using update-alternatives
     exec { "puppet-java-update-alternatives-jar-default-${vendor}-${version}-${arch}":
-      command   => "update-alternatives --set jar ${installDir}/jre/bin/jar",
+      command   => "update-alternatives --set jar ${installDir}/bin/jar",
       subscribe => Exec["puppet-java-install-${vendor}-${version}-${arch}", 
         "puppet-java-install-alternatives-jar-${vendor}-${version}-${arch}"],
     }
     # Set as default jhat using update-alternatives
     exec { "puppet-java-update-alternatives-jhat-default-${vendor}-${version}-${arch}":
-      command   => "update-alternatives --set jhat ${installDir}/jre/bin/jhat",
+      command   => "update-alternatives --set jhat ${installDir}/bin/jhat",
       subscribe => Exec["puppet-java-install-${vendor}-${version}-${arch}", 
         "puppet-java-install-alternatives-jhat-${vendor}-${version}-${arch}"],
     }
     # Set as default jstat using update-alternatives
     exec { "puppet-java-update-alternatives-jstat-default-${vendor}-${version}-${arch}":
-      command   => "update-alternatives --set jstat ${installDir}/jre/bin/jstat",
+      command   => "update-alternatives --set jstat ${installDir}/bin/jstat",
       subscribe => Exec["puppet-java-install-${vendor}-${version}-${arch}", 
         "puppet-java-install-alternatives-jstat-${vendor}-${version}-${arch}"],
     }
     # Set as default jps using update-alternatives
     exec { "puppet-java-update-alternatives-jps-default-${vendor}-${version}-${arch}":
-      command   => "update-alternatives --set jps ${installDir}/jre/bin/jps",
+      command   => "update-alternatives --set jps ${installDir}/bin/jps",
       subscribe => Exec["puppet-java-install-${vendor}-${version}-${arch}", 
         "puppet-java-install-alternatives-jps-${vendor}-${version}-${arch}"],
     }
     # Set as default jmap using update-alternatives
     exec { "puppet-java-update-alternatives-jmap-default-${vendor}-${version}-${arch}":
-      command   => "update-alternatives --set jmap ${installDir}/jre/bin/jmap",
+      command   => "update-alternatives --set jmap ${installDir}/bin/jmap",
       subscribe => Exec["puppet-java-install-${vendor}-${version}-${arch}", 
         "puppet-java-install-alternatives-jmap-${vendor}-${version}-${arch}"],
     }
     # Set as default jstack using update-alternatives
     exec { "puppet-java-update-alternatives-jstack-default-${vendor}-${version}-${arch}":
-      command   => "update-alternatives --set jstack ${installDir}/jre/bin/jstack",
+      command   => "update-alternatives --set jstack ${installDir}/bin/jstack",
       subscribe => Exec["puppet-java-install-${vendor}-${version}-${arch}", 
         "puppet-java-install-alternatives-jstack-${vendor}-${version}-${arch}"],
     }
