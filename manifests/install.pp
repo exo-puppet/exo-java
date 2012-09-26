@@ -157,16 +157,16 @@ define java::install ($vendor = "sun", $version, $arch, $defaultJava = false) {
         "puppet-java-install-alternatives-java-${vendor}-${version}-${arch}"],
     }
     # Set as default javac using update-alternatives
-    exec { "puppet-java-update-alternatives-java-default-${vendor}-${version}-${arch}":
-      command   => "update-alternatives --set java ${installDir}/jre/bin/java",
-      subscribe => Exec["puppet-java-install-${vendor}-${version}-${arch}", 
-        "puppet-java-install-alternatives-java-${vendor}-${version}-${arch}"],
-    }
-    # Set as default jar using update-alternatives
     exec { "puppet-java-update-alternatives-javac-default-${vendor}-${version}-${arch}":
       command   => "update-alternatives --set javac ${installDir}/jre/bin/javac",
       subscribe => Exec["puppet-java-install-${vendor}-${version}-${arch}", 
         "puppet-java-install-alternatives-javac-${vendor}-${version}-${arch}"],
+    }
+    # Set as default jar using update-alternatives
+    exec { "puppet-java-update-alternatives-jar-default-${vendor}-${version}-${arch}":
+      command   => "update-alternatives --set jar ${installDir}/jre/bin/jar",
+      subscribe => Exec["puppet-java-install-${vendor}-${version}-${arch}", 
+        "puppet-java-install-alternatives-jar-${vendor}-${version}-${arch}"],
     }
     # Set as default jhat using update-alternatives
     exec { "puppet-java-update-alternatives-jhat-default-${vendor}-${version}-${arch}":
