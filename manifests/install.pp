@@ -41,19 +41,26 @@
 #    }
 #
 ################################################################################
-define java::install ($vendor = "sun", $version, $arch, $defaultJava = false) {
+define java::install (
+  $vendor      = 'sun',
+  $version,
+  $arch,
+  $defaultJava = false) {
   Exec {
-    path => "/bin:/sbin:/usr/bin:/usr/sbin"
-  }
+    path => '/bin:/sbin:/usr/bin:/usr/sbin' }
 
   include java::params, java::config
   include wget
 
-  if !($vendor in ["sun"]) {
+  if !($vendor in [
+    'sun']) {
     fail('unknow java vendor $vendor . Please use "sun".')
   }
 
-  if !($arch in ["x64", "amd64", "i586"]) {
+  if !($arch in [
+    'x64',
+    'amd64',
+    'i586']) {
     fail('unknow architecture $arch . Please use "x64" or "i586" for java 6 and "amd64" or "i586" for java 5')
   }
 
@@ -62,9 +69,9 @@ define java::install ($vendor = "sun", $version, $arch, $defaultJava = false) {
   case $vendor {
     /(sun)/ : {
       # Extract the major version removing the beta
-      $major = inline_template("<%= scope.lookupvar('version').split('-')[0].gsub('.', '_') %>")
-      $file = "jdk-${major}-linux-${arch}.bin"
-      $url = "http://storage.exoplatform.org/public/java/jdk/sun/${version}/${file}"
+      $major   = inline_template('<%= scope.lookupvar(\'version\').split(\'-\')[0].gsub(\'.\', \'_\') %>')
+      $file    = "jdk-${major}-linux-${arch}.bin"
+      $url     = "http://storage.exoplatform.org/public/java/jdk/sun/${version}/${file}"
       $jdk_dir = "jdk-${major}-sun-${arch}"
     }
     default : {
@@ -78,12 +85,12 @@ define java::install ($vendor = "sun", $version, $arch, $defaultJava = false) {
     $priority = 5000
   }
 
-  Class["java::params"] -> Class["java::config"] -> # Download the archive
+  Class['java::params'] -> Class['java::config'] -> # Download the archive
   wget::fetch { "download-java-installer-${vendor}-${version}-${arch}":
-    source_url       => "${url}",
-    target_directory => "${java::params::downloadDir}",
-    target_file      => "${file}",
-    require          => File["$java::params::downloadDir"],
+    source_url       => $url,
+    target_directory => $java::params::downloadDir,
+    target_file      => $file,
+    require          => File[$java::params::downloadDir],
   } -> # Fix archive rights
   file { "${java::params::downloadDir}/${file}":
     ensure => present,
@@ -94,7 +101,7 @@ define java::install ($vendor = "sun", $version, $arch, $defaultJava = false) {
     owner   => root,
     group   => root,
     mode    => 0744,
-    content => template("java/puppet-install-java.sh.erb"),
+    content => template('java/puppet-install-java.sh.erb'),
   } -> # Process the installation
   exec { "puppet-java-install-${vendor}-${version}-${arch}":
     command => "${java::params::downloadDir}/puppet-install-java-${vendor}-${version}-${arch}.sh",
@@ -153,50 +160,57 @@ define java::install ($vendor = "sun", $version, $arch, $defaultJava = false) {
     # Set as default java using update-alternatives
     exec { "puppet-java-update-alternatives-java-default-${vendor}-${version}-${arch}":
       command   => "update-alternatives --set java ${installDir}/bin/java",
-      subscribe => Exec["puppet-java-install-${vendor}-${version}-${arch}", 
-        "puppet-java-install-alternatives-java-${vendor}-${version}-${arch}"],
+      subscribe => Exec["puppet-java-install-${vendor}-${version}-${arch}", "puppet-java-install-alternatives-java-${vendor}-${version}-${arch}"
+        ],
     }
+
     # Set as default javac using update-alternatives
     exec { "puppet-java-update-alternatives-javac-default-${vendor}-${version}-${arch}":
       command   => "update-alternatives --set javac ${installDir}/bin/javac",
-      subscribe => Exec["puppet-java-install-${vendor}-${version}-${arch}", 
-        "puppet-java-install-alternatives-javac-${vendor}-${version}-${arch}"],
+      subscribe => Exec["puppet-java-install-${vendor}-${version}-${arch}", "puppet-java-install-alternatives-javac-${vendor}-${version}-${arch}"
+        ],
     }
+
     # Set as default jar using update-alternatives
     exec { "puppet-java-update-alternatives-jar-default-${vendor}-${version}-${arch}":
       command   => "update-alternatives --set jar ${installDir}/bin/jar",
-      subscribe => Exec["puppet-java-install-${vendor}-${version}-${arch}", 
-        "puppet-java-install-alternatives-jar-${vendor}-${version}-${arch}"],
+      subscribe => Exec["puppet-java-install-${vendor}-${version}-${arch}", "puppet-java-install-alternatives-jar-${vendor}-${version}-${arch}"
+        ],
     }
+
     # Set as default jhat using update-alternatives
     exec { "puppet-java-update-alternatives-jhat-default-${vendor}-${version}-${arch}":
       command   => "update-alternatives --set jhat ${installDir}/bin/jhat",
-      subscribe => Exec["puppet-java-install-${vendor}-${version}-${arch}", 
-        "puppet-java-install-alternatives-jhat-${vendor}-${version}-${arch}"],
+      subscribe => Exec["puppet-java-install-${vendor}-${version}-${arch}", "puppet-java-install-alternatives-jhat-${vendor}-${version}-${arch}"
+        ],
     }
+
     # Set as default jstat using update-alternatives
     exec { "puppet-java-update-alternatives-jstat-default-${vendor}-${version}-${arch}":
       command   => "update-alternatives --set jstat ${installDir}/bin/jstat",
-      subscribe => Exec["puppet-java-install-${vendor}-${version}-${arch}", 
-        "puppet-java-install-alternatives-jstat-${vendor}-${version}-${arch}"],
+      subscribe => Exec["puppet-java-install-${vendor}-${version}-${arch}", "puppet-java-install-alternatives-jstat-${vendor}-${version}-${arch}"
+        ],
     }
+
     # Set as default jps using update-alternatives
     exec { "puppet-java-update-alternatives-jps-default-${vendor}-${version}-${arch}":
       command   => "update-alternatives --set jps ${installDir}/bin/jps",
-      subscribe => Exec["puppet-java-install-${vendor}-${version}-${arch}", 
-        "puppet-java-install-alternatives-jps-${vendor}-${version}-${arch}"],
+      subscribe => Exec["puppet-java-install-${vendor}-${version}-${arch}", "puppet-java-install-alternatives-jps-${vendor}-${version}-${arch}"
+        ],
     }
+
     # Set as default jmap using update-alternatives
     exec { "puppet-java-update-alternatives-jmap-default-${vendor}-${version}-${arch}":
       command   => "update-alternatives --set jmap ${installDir}/bin/jmap",
-      subscribe => Exec["puppet-java-install-${vendor}-${version}-${arch}", 
-        "puppet-java-install-alternatives-jmap-${vendor}-${version}-${arch}"],
+      subscribe => Exec["puppet-java-install-${vendor}-${version}-${arch}", "puppet-java-install-alternatives-jmap-${vendor}-${version}-${arch}"
+        ],
     }
+
     # Set as default jstack using update-alternatives
     exec { "puppet-java-update-alternatives-jstack-default-${vendor}-${version}-${arch}":
       command   => "update-alternatives --set jstack ${installDir}/bin/jstack",
-      subscribe => Exec["puppet-java-install-${vendor}-${version}-${arch}", 
-        "puppet-java-install-alternatives-jstack-${vendor}-${version}-${arch}"],
+      subscribe => Exec["puppet-java-install-${vendor}-${version}-${arch}", "puppet-java-install-alternatives-jstack-${vendor}-${version}-${arch}"
+        ],
     }
   }
 }
