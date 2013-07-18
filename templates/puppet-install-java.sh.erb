@@ -11,7 +11,7 @@ PUPPET_JAVA_VENDOR=<%= scope.lookupvar('vendor') %>
 PUPPET_JAVA_VERSION=<%= scope.lookupvar('version') %>
 PUPPET_JAVA_ARCH=<%= scope.lookupvar('arch') %>
 PUPPET_JAVA_FILE=<%= scope.lookupvar('file') %>
-PUPPET_JAVA_DL_DIR=<%= scope.lookupvar('java::params::downloadDir') %>
+PUPPET_JAVA_DL_DIR=<%= scope.lookupvar('downloadDir') %>
 PUPPET_JAVA_INSTALL_DIR=<%= scope.lookupvar('installDir') %>
 
 PUPPET_JAVA_TMP_WORK=$PUPPET_JAVA_DL_DIR/tmp/puppet-java-`date "+%Y%m%d-%H%M%S"`

@@ -45,19 +45,17 @@ define java::install (
   $vendor      = 'sun',
   $version,
   $arch,
-  $defaultJava = false) {
-
+  $defaultJava = false,
+  $downloadDir = '/srv/download') {
   # modules dependencies
   include repo
   include wget
 
   # internal classes
-  include java::params, java::config
+  include java::params
 
   Exec {
     path => '/bin:/sbin:/usr/bin:/usr/sbin' }
-
-
 
   if !($vendor in [
     'sun']) {
@@ -92,18 +90,28 @@ define java::install (
     $priority = 5000
   }
 
-  Class['java::params'] -> Class['java::config'] -> # Download the archive
+  # Let's create the download directory if it wasn't created
+  if !defined(File[$downloadDir]) {
+    file { $downloadDir:
+      ensure => directory,
+      owner  => root,
+      group  => root,
+    }
+  }
+
+  Class['java::params'] -> # Packaged required by the installer
+  repo::package { 'g++-multilib': } -> # Download the archive
   wget::fetch { "download-java-installer-${vendor}-${version}-${arch}":
     source_url       => $url,
-    target_directory => $java::params::downloadDir,
+    target_directory => $downloadDir,
     target_file      => $file,
-    require          => File[$java::params::downloadDir],
+    require          => File[$downloadDir],
   } -> # Fix archive rights
-  file { "${java::params::downloadDir}/${file}":
+  file { "${downloadDir}/${file}":
     ensure => present,
     mode   => 755,
   } -> # Generates installer script
-  file { "${java::params::downloadDir}/puppet-install-java-${vendor}-${version}-${arch}.sh":
+  file { "${downloadDir}/puppet-install-java-${vendor}-${version}-${arch}.sh":
     ensure  => file,
     owner   => root,
     group   => root,
@@ -111,7 +119,7 @@ define java::install (
     content => template('java/puppet-install-java.sh.erb'),
   } -> # Process the installation
   exec { "puppet-java-install-${vendor}-${version}-${arch}":
-    command => "${java::params::downloadDir}/puppet-install-java-${vendor}-${version}-${arch}.sh",
+    command => "${downloadDir}/puppet-install-java-${vendor}-${version}-${arch}.sh",
     unless  => "test -d ${installDir}/jre/bin",
   }
 
