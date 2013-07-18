@@ -46,11 +46,18 @@ define java::install (
   $version,
   $arch,
   $defaultJava = false) {
+
+  # modules dependencies
+  include repo
+  include wget
+
+  # internal classes
+  include java::params, java::config
+
   Exec {
     path => '/bin:/sbin:/usr/bin:/usr/sbin' }
 
-  include java::params, java::config
-  include wget
+
 
   if !($vendor in [
     'sun']) {

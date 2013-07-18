@@ -10,6 +10,6 @@ class java::config {
   }
 
   # Packaged required by the installer
-  package { 'g++-multilib': ensure => installed, }
+  repo::package { 'g++-multilib': }
 
 }
