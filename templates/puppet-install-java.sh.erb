@@ -14,14 +14,13 @@ PUPPET_JAVA_FILE=<%= scope.lookupvar('file') %>
 PUPPET_JAVA_DL_DIR=<%= scope.lookupvar('downloadDir') %>
 PUPPET_JAVA_INSTALL_DIR=<%= scope.lookupvar('installDir') %>
 
-PUPPET_JAVA_TMP_WORK=$PUPPET_JAVA_DL_DIR/tmp/puppet-java-`date "+%Y%m%d-%H%M%S"`
+PUPPET_JAVA_TMP_WORK=$(mktemp -d)
 
 if [ -d $PUPPET_JAVA_INSTALL_DIR ]; then
   echo "$PUPPET_JAVA_VENDOR Java $PUPPET_JAVA_VERSION $PUPPET_JAVA_ARCH already installed in $PUPPET_JAVA_INSTALL_DIR";
   exit 0;
 fi
 
-mkdir -p $PUPPET_JAVA_TMP_WORK
 cd $PUPPET_JAVA_TMP_WORK
 cp $PUPPET_JAVA_DL_DIR/$PUPPET_JAVA_FILE .
 ./$PUPPET_JAVA_FILE
