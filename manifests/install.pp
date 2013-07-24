@@ -90,17 +90,15 @@ define java::install (
     $priority = 5000
   }
 
-  # Let's create the download directory if it wasn't created
-  if !defined(File[$downloadDir]) {
-    file { $downloadDir:
-      ensure => directory,
-      owner  => root,
-      group  => root,
+  # Packaged required by the installer
+  if !defined(Package['g++-multilib']) {
+    package { 'g++-multilib':
+      ensure  => installed,
+      require => Class['repo::update'],
     }
   }
 
-  Class['java::params'] -> # Packaged required by the installer
-  repo::package { 'g++-multilib': } -> # Download the archive
+  Class['java::params'] -> # Download the archive
   wget::fetch { "download-java-installer-${vendor}-${version}-${arch}":
     source_url       => $url,
     target_directory => $downloadDir,
@@ -121,6 +119,7 @@ define java::install (
   exec { "puppet-java-install-${vendor}-${version}-${arch}":
     command => "${downloadDir}/puppet-install-java-${vendor}-${version}-${arch}.sh",
     unless  => "test -d ${installDir}/jre/bin",
+    require => Package['g++-multilib'],
   }
 
   # Registers java using update-alternatives
