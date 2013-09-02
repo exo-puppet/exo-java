@@ -21,11 +21,27 @@ if [ -d $PUPPET_JAVA_INSTALL_DIR ]; then
   exit 0;
 fi
 
-cd $PUPPET_JAVA_TMP_WORK
+pushd ${PUPPET_JAVA_TMP_WORK} > /dev/null 2>&1
+
 cp $PUPPET_JAVA_DL_DIR/$PUPPET_JAVA_FILE .
-./$PUPPET_JAVA_FILE
+
+case "$PUPPET_JAVA_FILE" in
+  *.bin)
+    chmod 755 ./$PUPPET_JAVA_FILE
+    ./$PUPPET_JAVA_FILE
+  ;;
+  *.tar.gz | *.tgz)
+     tar -xzf ./$PUPPET_JAVA_FILE
+  ;;
+  *)
+    echo "Unknown type of file : $PUPPET_JAVA_FILE";
+    exit 1;
+  ;;
+esac
+
 mkdir -p "$(dirname $PUPPET_JAVA_INSTALL_DIR)"
 find . -mindepth 1 -maxdepth 1 -type d -exec cp -rf {} $PUPPET_JAVA_INSTALL_DIR \;
 
-cd -
+popd > /dev/null 2>&1
+
 rm -rf $PUPPET_JAVA_TMP_WORK

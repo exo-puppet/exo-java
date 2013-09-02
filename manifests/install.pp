@@ -10,7 +10,7 @@
 # [+editor+]
 #   (OPTIONAL) (default: sun)
 #
-#   this variable allows to select the vendor of the jvm (values: sun. TODO : ibm, jrockit, openjdk)
+#   this variable allows to select the vendor of the jvm (values: sun (java 6), oracle (java 7+). TODO : ibm, jrockit, openjdk)
 #
 # [+version+]
 #
@@ -37,6 +37,13 @@
 #        "sun-java6-i586" :
 #            version => "6u30-b12",
 #            arch => "i586",
+#            defaultJava => false,
+#    }
+#
+#    java::install {
+#        "oracle-java7-i586" :
+#            version => "7u25",
+#            arch => "x64",
 #            defaultJava => true,
 #    }
 #
@@ -52,15 +59,10 @@ define java::install (
   include wget
 
   # internal classes
-  include java::params
+  require java::params
 
   Exec {
     path => '/bin:/sbin:/usr/bin:/usr/sbin' }
-
-  if !($vendor in [
-    'sun']) {
-    fail('unknow java vendor $vendor . Please use "sun".')
-  }
 
   if !($arch in [
     'x64',
@@ -72,17 +74,26 @@ define java::install (
   $installDir = "${java::params::installRootDir}/jdk-${vendor}-${version}-${arch}"
 
   case $vendor {
+    # Java <= 6 are using the vendor sun
     /(sun)/ : {
       # Extract the major version removing the beta
       $major   = inline_template('<%= scope.lookupvar(\'version\').split(\'-\')[0].gsub(\'.\', \'_\') %>')
       $file    = "jdk-${major}-linux-${arch}.bin"
-      $url     = "http://storage.exoplatform.org/public/java/jdk/sun/${version}/${file}"
-      $jdk_dir = "jdk-${major}-sun-${arch}"
+      $jdk_dir = "jdk-${major}-${vendor}-${arch}"
+    }
+    # Java > 6 are using the vendor oracle
+    /(oracle)/ : {
+      $file    = "jdk-${version}-linux-${arch}.tar.gz"
+      $jdk_dir = "jdk-${version}-${vendor}-${arch}"
     }
     default : {
       fail("The ${vendor} vendor is not supported")
     }
   }
+
+  # eXo dedicated storage to avoid license controls from oracle that don't allow to automate the process
+  # We manually download the binary and validate the license once from oracle and upload them here
+  $url = "http://storage.exoplatform.org/public/java/jdk/${vendor}/${version}/${file}"
 
   if ($defaultJava) {
     $priority = 10000
@@ -104,10 +115,6 @@ define java::install (
     target_directory => $downloadDir,
     target_file      => $file,
     require          => File[$downloadDir],
-  } -> # Fix archive rights
-  file { "${downloadDir}/${file}":
-    ensure => present,
-    mode   => 755,
   } -> # Generates installer script
   file { "${downloadDir}/puppet-install-java-${vendor}-${version}-${arch}.sh":
     ensure  => file,
