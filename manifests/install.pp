@@ -103,10 +103,7 @@ define java::install (
 
   # Packaged required by the installer
   if !defined(Package['g++-multilib']) {
-    package { 'g++-multilib':
-      ensure  => installed,
-      require => Class['repo::update'],
-    }
+    repo::package { 'g++-multilib': }
   }
 
   Class['java::params'] -> # Download the archive
@@ -126,7 +123,7 @@ define java::install (
   exec { "puppet-java-install-${vendor}-${version}-${arch}":
     command => "${downloadDir}/puppet-install-java-${vendor}-${version}-${arch}.sh",
     unless  => "test -d ${installDir}/jre/bin",
-    require => Package['g++-multilib'],
+    require => Repo::Package['g++-multilib'],
   }
 
   # Registers java using update-alternatives
