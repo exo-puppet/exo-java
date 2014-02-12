@@ -102,7 +102,7 @@ define java::install (
   }
 
   # Packaged required by the installer
-  if !defined(Package['g++-multilib']) {
+  if !defined(Repo::Package['g++-multilib']) {
     repo::package { 'g++-multilib': }
   }
 
