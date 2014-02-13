@@ -106,20 +106,23 @@ define java::install (
     repo::package { 'g++-multilib': }
   }
 
-  Class['java::params'] -> # Download the archive
+  Class['java::params'] ->
+  # Download the archive
   wget::fetch { "download-java-installer-${vendor}-${version}-${arch}":
     source_url       => $url,
     target_directory => $downloadDir,
     target_file      => $file,
     require          => File[$downloadDir],
-  } -> # Generates installer script
+  } ->
+  # Generates installer script
   file { "${downloadDir}/puppet-install-java-${vendor}-${version}-${arch}.sh":
     ensure  => file,
     owner   => root,
     group   => root,
     mode    => 0744,
     content => template('java/puppet-install-java.sh.erb'),
-  } -> # Process the installation
+  } ->
+  # Process the installation
   exec { "puppet-java-install-${vendor}-${version}-${arch}":
     command => "${downloadDir}/puppet-install-java-${vendor}-${version}-${arch}.sh",
     unless  => "test -d ${installDir}/jre/bin",
@@ -127,108 +130,195 @@ define java::install (
   }
 
   # Registers java using update-alternatives
-  exec { "puppet-java-install-alternatives-java-${vendor}-${version}-${arch}":
-    command   => "update-alternatives --install /usr/bin/java java ${installDir}/bin/java ${priority}",
-    subscribe => Exec["puppet-java-install-${vendor}-${version}-${arch}"],
+  java::alternative { "java-alternatives-java-${vendor}-${version}-${arch}":
+    defaultJava     => $defaultJava,
+    vendor          => $vendor,
+    version         => $version,
+    arch            => $arch,
+    binary_name     => 'java',
+    binary_dir      => "${installDir}/bin",
+    binary_link_dir => '/usr/bin',
   }
 
   # Registers javac using update-alternatives
-  exec { "puppet-java-install-alternatives-javac-${vendor}-${version}-${arch}":
-    command   => "update-alternatives --install /usr/bin/javac javac ${installDir}/bin/javac ${priority}",
-    subscribe => Exec["puppet-java-install-${vendor}-${version}-${arch}"],
+  java::alternative { "java-alternatives-javac-${vendor}-${version}-${arch}":
+    defaultJava     => $defaultJava,
+    vendor          => $vendor,
+    version         => $version,
+    arch            => $arch,
+    binary_name     => 'javac',
+    binary_dir      => "${installDir}/bin",
+    binary_link_dir => '/usr/bin',
   }
 
   # Registers jar using update-alternatives
-  exec { "puppet-java-install-alternatives-jar-${vendor}-${version}-${arch}":
-    command   => "update-alternatives --install /usr/bin/jar jar ${installDir}/bin/jar ${priority}",
-    subscribe => Exec["puppet-java-install-${vendor}-${version}-${arch}"],
+  java::alternative { "java-alternatives-jar-${vendor}-${version}-${arch}":
+    defaultJava     => $defaultJava,
+    vendor          => $vendor,
+    version         => $version,
+    arch            => $arch,
+    binary_name     => 'jar',
+    binary_dir      => "${installDir}/bin",
+    binary_link_dir => '/usr/bin',
   }
 
   # Registers jhat using update-alternatives
-  exec { "puppet-java-install-alternatives-jhat-${vendor}-${version}-${arch}":
-    command   => "update-alternatives --install /usr/bin/jhat jhat ${installDir}/bin/jhat ${priority}",
-    subscribe => Exec["puppet-java-install-${vendor}-${version}-${arch}"],
+  java::alternative { "java-alternatives-jhat-${vendor}-${version}-${arch}":
+    defaultJava     => $defaultJava,
+    vendor          => $vendor,
+    version         => $version,
+    arch            => $arch,
+    binary_name     => 'jhat',
+    binary_dir      => "${installDir}/bin",
+    binary_link_dir => '/usr/bin',
   }
 
   # Registers jstat using update-alternatives
-  exec { "puppet-java-install-alternatives-jstat-${vendor}-${version}-${arch}":
-    command   => "update-alternatives --install /usr/bin/jstat jstat ${installDir}/bin/jstat ${priority}",
-    subscribe => Exec["puppet-java-install-${vendor}-${version}-${arch}"],
+  java::alternative { "java-alternatives-jstat-${vendor}-${version}-${arch}":
+    defaultJava     => $defaultJava,
+    vendor          => $vendor,
+    version         => $version,
+    arch            => $arch,
+    binary_name     => 'jstat',
+    binary_dir      => "${installDir}/bin",
+    binary_link_dir => '/usr/bin',
   }
 
   # Registers jps using update-alternatives
-  exec { "puppet-java-install-alternatives-jps-${vendor}-${version}-${arch}":
-    command   => "update-alternatives --install /usr/bin/jps jps ${installDir}/bin/jps ${priority}",
-    subscribe => Exec["puppet-java-install-${vendor}-${version}-${arch}"],
+  java::alternative { "java-alternatives-jps-${vendor}-${version}-${arch}":
+    defaultJava     => $defaultJava,
+    vendor          => $vendor,
+    version         => $version,
+    arch            => $arch,
+    binary_name     => 'jps',
+    binary_dir      => "${installDir}/bin",
+    binary_link_dir => '/usr/bin',
   }
 
   # Registers jmap using update-alternatives
-  exec { "puppet-java-install-alternatives-jmap-${vendor}-${version}-${arch}":
-    command   => "update-alternatives --install /usr/bin/jmap jmap ${installDir}/bin/jmap ${priority}",
-    subscribe => Exec["puppet-java-install-${vendor}-${version}-${arch}"],
+  java::alternative { "java-alternatives-jmap-${vendor}-${version}-${arch}":
+    defaultJava     => $defaultJava,
+    vendor          => $vendor,
+    version         => $version,
+    arch            => $arch,
+    binary_name     => 'jmap',
+    binary_dir      => "${installDir}/bin",
+    binary_link_dir => '/usr/bin',
   }
 
   # Registers jstack using update-alternatives
-  exec { "puppet-java-install-alternatives-jstack-${vendor}-${version}-${arch}":
-    command   => "update-alternatives --install /usr/bin/jstack jstack ${installDir}/bin/jstack ${priority}",
-    subscribe => Exec["puppet-java-install-${vendor}-${version}-${arch}"],
+  java::alternative { "java-alternatives-jstack-${vendor}-${version}-${arch}":
+    defaultJava     => $defaultJava,
+    vendor          => $vendor,
+    version         => $version,
+    arch            => $arch,
+    binary_name     => 'jstack',
+    binary_dir      => "${installDir}/bin",
+    binary_link_dir => '/usr/bin',
   }
 
-  if ($defaultJava) {
-    # Set as default java using update-alternatives
-    exec { "puppet-java-update-alternatives-java-default-${vendor}-${version}-${arch}":
-      command   => "update-alternatives --set java ${installDir}/bin/java",
-      subscribe => Exec["puppet-java-install-${vendor}-${version}-${arch}", "puppet-java-install-alternatives-java-${vendor}-${version}-${arch}"
-        ],
-    }
 
-    # Set as default javac using update-alternatives
-    exec { "puppet-java-update-alternatives-javac-default-${vendor}-${version}-${arch}":
-      command   => "update-alternatives --set javac ${installDir}/bin/javac",
-      subscribe => Exec["puppet-java-install-${vendor}-${version}-${arch}", "puppet-java-install-alternatives-javac-${vendor}-${version}-${arch}"
-        ],
-    }
 
-    # Set as default jar using update-alternatives
-    exec { "puppet-java-update-alternatives-jar-default-${vendor}-${version}-${arch}":
-      command   => "update-alternatives --set jar ${installDir}/bin/jar",
-      subscribe => Exec["puppet-java-install-${vendor}-${version}-${arch}", "puppet-java-install-alternatives-jar-${vendor}-${version}-${arch}"
-        ],
-    }
-
-    # Set as default jhat using update-alternatives
-    exec { "puppet-java-update-alternatives-jhat-default-${vendor}-${version}-${arch}":
-      command   => "update-alternatives --set jhat ${installDir}/bin/jhat",
-      subscribe => Exec["puppet-java-install-${vendor}-${version}-${arch}", "puppet-java-install-alternatives-jhat-${vendor}-${version}-${arch}"
-        ],
-    }
-
-    # Set as default jstat using update-alternatives
-    exec { "puppet-java-update-alternatives-jstat-default-${vendor}-${version}-${arch}":
-      command   => "update-alternatives --set jstat ${installDir}/bin/jstat",
-      subscribe => Exec["puppet-java-install-${vendor}-${version}-${arch}", "puppet-java-install-alternatives-jstat-${vendor}-${version}-${arch}"
-        ],
-    }
-
-    # Set as default jps using update-alternatives
-    exec { "puppet-java-update-alternatives-jps-default-${vendor}-${version}-${arch}":
-      command   => "update-alternatives --set jps ${installDir}/bin/jps",
-      subscribe => Exec["puppet-java-install-${vendor}-${version}-${arch}", "puppet-java-install-alternatives-jps-${vendor}-${version}-${arch}"
-        ],
-    }
-
-    # Set as default jmap using update-alternatives
-    exec { "puppet-java-update-alternatives-jmap-default-${vendor}-${version}-${arch}":
-      command   => "update-alternatives --set jmap ${installDir}/bin/jmap",
-      subscribe => Exec["puppet-java-install-${vendor}-${version}-${arch}", "puppet-java-install-alternatives-jmap-${vendor}-${version}-${arch}"
-        ],
-    }
-
-    # Set as default jstack using update-alternatives
-    exec { "puppet-java-update-alternatives-jstack-default-${vendor}-${version}-${arch}":
-      command   => "update-alternatives --set jstack ${installDir}/bin/jstack",
-      subscribe => Exec["puppet-java-install-${vendor}-${version}-${arch}", "puppet-java-install-alternatives-jstack-${vendor}-${version}-${arch}"
-        ],
-    }
+  # Registers jexec using update-alternatives
+  java::alternative { "java-alternatives-jexec-${vendor}-${version}-${arch}":
+    defaultJava     => $defaultJava,
+    vendor          => $vendor,
+    version         => $version,
+    arch            => $arch,
+    binary_name     => 'jexec',
+    binary_dir      => "${installDir}/lib",
+    binary_link_dir => '/usr/bin',
   }
+
+  # Registers keytool using update-alternatives
+  java::alternative { "java-alternatives-keytool-${vendor}-${version}-${arch}":
+    defaultJava     => $defaultJava,
+    vendor          => $vendor,
+    version         => $version,
+    arch            => $arch,
+    binary_name     => 'keytool',
+    binary_dir      => "${installDir}/bin",
+    binary_link_dir => '/usr/bin',
+  }
+
+  # Registers orbd using update-alternatives
+  java::alternative { "java-alternatives-orbd-${vendor}-${version}-${arch}":
+    defaultJava     => $defaultJava,
+    vendor          => $vendor,
+    version         => $version,
+    arch            => $arch,
+    binary_name     => 'orbd',
+    binary_dir      => "${installDir}/bin",
+    binary_link_dir => '/usr/bin',
+  }
+
+  # Registers pack200 using update-alternatives
+  java::alternative { "java-alternatives-pack200-${vendor}-${version}-${arch}":
+    defaultJava     => $defaultJava,
+    vendor          => $vendor,
+    version         => $version,
+    arch            => $arch,
+    binary_name     => 'pack200',
+    binary_dir      => "${installDir}/bin",
+    binary_link_dir => '/usr/bin',
+  }
+
+
+
+
+  # Registers rmid using update-alternatives
+  java::alternative { "java-alternatives-rmid-${vendor}-${version}-${arch}":
+    defaultJava     => $defaultJava,
+    vendor          => $vendor,
+    version         => $version,
+    arch            => $arch,
+    binary_name     => 'rmid',
+    binary_dir      => "${installDir}/bin",
+    binary_link_dir => '/usr/bin',
+  }
+
+  # Registers rmiregistry using update-alternatives
+  java::alternative { "java-alternatives-rmiregistry-${vendor}-${version}-${arch}":
+    defaultJava     => $defaultJava,
+    vendor          => $vendor,
+    version         => $version,
+    arch            => $arch,
+    binary_name     => 'rmiregistry',
+    binary_dir      => "${installDir}/bin",
+    binary_link_dir => '/usr/bin',
+  }
+
+  # Registers servertool using update-alternatives
+  java::alternative { "java-alternatives-servertool-${vendor}-${version}-${arch}":
+    defaultJava     => $defaultJava,
+    vendor          => $vendor,
+    version         => $version,
+    arch            => $arch,
+    binary_name     => 'servertool',
+    binary_dir      => "${installDir}/bin",
+    binary_link_dir => '/usr/bin',
+  }
+
+  # Registers tnameserv using update-alternatives
+  java::alternative { "java-alternatives-tnameserv-${vendor}-${version}-${arch}":
+    defaultJava     => $defaultJava,
+    vendor          => $vendor,
+    version         => $version,
+    arch            => $arch,
+    binary_name     => 'tnameserv',
+    binary_dir      => "${installDir}/bin",
+    binary_link_dir => '/usr/bin',
+  }
+
+  # Registers unpack200 using update-alternatives
+  java::alternative { "java-alternatives-unpack200-${vendor}-${version}-${arch}":
+    defaultJava     => $defaultJava,
+    vendor          => $vendor,
+    version         => $version,
+    arch            => $arch,
+    binary_name     => 'unpack200',
+    binary_dir      => "${installDir}/bin",
+    binary_link_dir => '/usr/bin',
+  }
+
 }
