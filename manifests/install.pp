@@ -49,11 +49,12 @@
 #
 ################################################################################
 define java::install (
-  $vendor      = 'sun',
+  $vendor       = 'sun',
   $version,
   $arch,
-  $defaultJava = false,
-  $downloadDir = '/srv/download') {
+  $defaultJava  = false,
+  $downloadDir  = '/srv/download') {
+
   # modules dependencies
   include repo
   include wget
@@ -61,13 +62,9 @@ define java::install (
   # internal classes
   require java::params
 
-  Exec {
-    path => '/bin:/sbin:/usr/bin:/usr/sbin' }
+  Exec {path => '/bin:/sbin:/usr/bin:/usr/sbin' }
 
-  if !($arch in [
-    'x64',
-    'amd64',
-    'i586']) {
+  if !($arch in ['x64','amd64','i586']) {
     fail('unknow architecture $arch . Please use "x64" or "i586" for java 6 and "amd64" or "i586" for java 5')
   }
 
@@ -94,12 +91,6 @@ define java::install (
   # eXo dedicated storage to avoid license controls from oracle that don't allow to automate the process
   # We manually download the binary and validate the license once from oracle and upload them here
   $url = "http://storage.exoplatform.org/public/java/jdk/${vendor}/${version}/${file}"
-
-  if ($defaultJava) {
-    $priority = 10000
-  } else {
-    $priority = 5000
-  }
 
   # Packaged required by the installer
   if !defined(Repo::Package['g++-multilib']) {
