@@ -42,6 +42,16 @@ esac
 mkdir -p "$(dirname $PUPPET_JAVA_INSTALL_DIR)"
 find . -mindepth 1 -maxdepth 1 -type d -exec cp -rf {} $PUPPET_JAVA_INSTALL_DIR \;
 
+if [ -e ${PUPPET_JAVA_INSTALL_DIR}/bin/java ]
+then
+  # Detecting java main version and create a symlink
+  VERSION=$( ${PUPPET_JAVA_INSTALL_DIR}/bin/java -version 2>&1 | head -n 1)
+  MAIN_VERSION=$(echo $VERSION | cut -f2 -d'"' | cut -f1,2 -d".")
+  LINK=$(dirname ${PUPPET_JAVA_INSTALL_DIR})/jdk${MAIN_VERSION}
+  rm -f ${LINK}
+  ln -sf ${PUPPET_JAVA_INSTALL_DIR} $(dirname ${PUPPET_JAVA_INSTALL_DIR})/jdk${MAIN_VERSION}
+fi
+
 popd > /dev/null 2>&1
 
 rm -rf $PUPPET_JAVA_TMP_WORK
