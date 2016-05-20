@@ -56,7 +56,7 @@ define java::install (
   $downloadDir  = '/srv/download') {
 
   # modules dependencies
-  include repo
+  include stdlib
   include wget
 
   # internal classes
@@ -93,9 +93,7 @@ define java::install (
   $url = "http://storage.exoplatform.org/public/java/jdk/${vendor}/${version}/${file}"
 
   # Packaged required by the installer
-  if !defined(Repo::Package['g++-multilib']) {
-    repo::package { 'g++-multilib': }
-  }
+  ensure_packages ('g++-multilib', { 'require' => Class['apt::update'] })
 
   Class['java::params'] ->
   # Download the archive
@@ -117,7 +115,7 @@ define java::install (
   exec { "puppet-java-install-${vendor}-${version}-${arch}":
     command => "${downloadDir}/puppet-install-java-${vendor}-${version}-${arch}.sh",
     unless  => "test -d ${installDir}/jre/bin",
-    require => Repo::Package['g++-multilib'],
+    require => Package['g++-multilib'],
   }
 
   # Registers java using update-alternatives
