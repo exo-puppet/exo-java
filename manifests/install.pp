@@ -69,18 +69,27 @@ define java::install (
   }
 
   $installDir = "${java::params::installRootDir}/jdk-${vendor}-${version}-${arch}"
+  
+  $major = inline_template('<%= scope.lookupvar(\'version\').split(\'-\')[0].gsub(\'.\', \'_\') %>')
+  # convert $major value to an integer
+  $majora = scanf($major, "%i") 
+  $majori = $majora[0]
+  validate_integer($majori)
 
   case $vendor {
     # Java <= 6 are using the vendor sun
     /(sun)/ : {
       # Extract the major version removing the beta
-      $major   = inline_template('<%= scope.lookupvar(\'version\').split(\'-\')[0].gsub(\'.\', \'_\') %>')
       $file    = "jdk-${major}-linux-${arch}.bin"
       $jdk_dir = "jdk-${major}-${vendor}-${arch}"
     }
     # Java > 6 are using the vendor oracle
     /(oracle)/ : {
-      $file    = "jdk-${version}-linux-${arch}.tar.gz"
+      if ( $majori < 9 ) {
+        $file    = "jdk-${version}-linux-${arch}.tar.gz"
+      } else {
+        $file    = "jdk-${version}_linux-${arch}_bin.tar.gz"
+      }
       $jdk_dir = "jdk-${version}-${vendor}-${arch}"
     }
     default : {
@@ -147,17 +156,6 @@ define java::install (
     version         => $version,
     arch            => $arch,
     binary_name     => 'jar',
-    binary_dir      => "${installDir}/bin",
-    binary_link_dir => '/usr/bin',
-  }
-
-  # Registers jhat using update-alternatives
-  java::alternative { "java-alternatives-jhat-${vendor}-${version}-${arch}":
-    defaultJava     => $defaultJava,
-    vendor          => $vendor,
-    version         => $version,
-    arch            => $arch,
-    binary_name     => 'jhat',
     binary_dir      => "${installDir}/bin",
     binary_link_dir => '/usr/bin',
   }
@@ -230,17 +228,6 @@ define java::install (
     binary_link_dir => '/usr/bin',
   }
 
-  # Registers orbd using update-alternatives
-  java::alternative { "java-alternatives-orbd-${vendor}-${version}-${arch}":
-    defaultJava     => $defaultJava,
-    vendor          => $vendor,
-    version         => $version,
-    arch            => $arch,
-    binary_name     => 'orbd',
-    binary_dir      => "${installDir}/bin",
-    binary_link_dir => '/usr/bin',
-  }
-
   # Registers pack200 using update-alternatives
   java::alternative { "java-alternatives-pack200-${vendor}-${version}-${arch}":
     defaultJava     => $defaultJava,
@@ -251,9 +238,6 @@ define java::install (
     binary_dir      => "${installDir}/bin",
     binary_link_dir => '/usr/bin',
   }
-
-
-
 
   # Registers rmid using update-alternatives
   java::alternative { "java-alternatives-rmid-${vendor}-${version}-${arch}":
@@ -277,28 +261,6 @@ define java::install (
     binary_link_dir => '/usr/bin',
   }
 
-  # Registers servertool using update-alternatives
-  java::alternative { "java-alternatives-servertool-${vendor}-${version}-${arch}":
-    defaultJava     => $defaultJava,
-    vendor          => $vendor,
-    version         => $version,
-    arch            => $arch,
-    binary_name     => 'servertool',
-    binary_dir      => "${installDir}/bin",
-    binary_link_dir => '/usr/bin',
-  }
-
-  # Registers tnameserv using update-alternatives
-  java::alternative { "java-alternatives-tnameserv-${vendor}-${version}-${arch}":
-    defaultJava     => $defaultJava,
-    vendor          => $vendor,
-    version         => $version,
-    arch            => $arch,
-    binary_name     => 'tnameserv',
-    binary_dir      => "${installDir}/bin",
-    binary_link_dir => '/usr/bin',
-  }
-
   # Registers unpack200 using update-alternatives
   java::alternative { "java-alternatives-unpack200-${vendor}-${version}-${arch}":
     defaultJava     => $defaultJava,
@@ -308,6 +270,132 @@ define java::install (
     binary_name     => 'unpack200',
     binary_dir      => "${installDir}/bin",
     binary_link_dir => '/usr/bin',
+  }
+
+  if $majori < 9 {
+    # Registers orbd using update-alternatives
+    java::alternative { "java-alternatives-orbd-${vendor}-${version}-${arch}":
+      defaultJava     => $defaultJava,
+      vendor          => $vendor,
+      version         => $version,
+      arch            => $arch,
+      binary_name     => 'orbd',
+      binary_dir      => "${installDir}/bin",
+      binary_link_dir => '/usr/bin',
+    }
+
+    # Registers servertool using update-alternatives
+    java::alternative { "java-alternatives-servertool-${vendor}-${version}-${arch}":
+      defaultJava     => $defaultJava,
+      vendor          => $vendor,
+      version         => $version,
+      arch            => $arch,
+      binary_name     => 'servertool',
+      binary_dir      => "${installDir}/bin",
+      binary_link_dir => '/usr/bin',
+    }
+
+    # Registers tnameserv using update-alternatives
+    java::alternative { "java-alternatives-tnameserv-${vendor}-${version}-${arch}":
+      defaultJava     => $defaultJava,
+      vendor          => $vendor,
+      version         => $version,
+      arch            => $arch,
+      binary_name     => 'tnameserv',
+      binary_dir      => "${installDir}/bin",
+      binary_link_dir => '/usr/bin',
+    }
+
+    # Registers jhat using update-alternatives
+    java::alternative { "java-alternatives-jhat-${vendor}-${version}-${arch}":
+      defaultJava     => $defaultJava,
+      vendor          => $vendor,
+      version         => $version,
+      arch            => $arch,
+      binary_name     => 'jhat',
+      binary_dir      => "${installDir}/bin",
+      binary_link_dir => '/usr/bin',
+    }
+
+  } else {
+    # Declare new jdk >= 9 tools
+
+    # Registers jaotc using update-alternatives
+    java::alternative { "java-alternatives-jaotc-${vendor}-${version}-${arch}":
+      defaultJava     => $defaultJava,
+      vendor          => $vendor,
+      version         => $version,
+      arch            => $arch,
+      binary_name     => 'jaotc',
+      binary_dir      => "${installDir}/bin",
+      binary_link_dir => '/usr/bin',
+    }
+
+    # Registers jdeprscan using update-alternatives
+    java::alternative { "java-alternatives-jdeprscan-${vendor}-${version}-${arch}":
+      defaultJava     => $defaultJava,
+      vendor          => $vendor,
+      version         => $version,
+      arch            => $arch,
+      binary_name     => 'jdeprscan',
+      binary_dir      => "${installDir}/bin",
+      binary_link_dir => '/usr/bin',
+    }
+
+    # Registers jhsdb using update-alternatives
+    java::alternative { "java-alternatives-jhsdb-${vendor}-${version}-${arch}":
+      defaultJava     => $defaultJava,
+      vendor          => $vendor,
+      version         => $version,
+      arch            => $arch,
+      binary_name     => 'jhsdb',
+      binary_dir      => "${installDir}/bin",
+      binary_link_dir => '/usr/bin',
+    }
+
+    # Registers jimage using update-alternatives
+    java::alternative { "java-alternatives-jimage-${vendor}-${version}-${arch}":
+      defaultJava     => $defaultJava,
+      vendor          => $vendor,
+      version         => $version,
+      arch            => $arch,
+      binary_name     => 'jimage',
+      binary_dir      => "${installDir}/bin",
+      binary_link_dir => '/usr/bin',
+    }
+
+    # Registers jlink using update-alternatives
+    java::alternative { "java-alternatives-jlink-${vendor}-${version}-${arch}":
+      defaultJava     => $defaultJava,
+      vendor          => $vendor,
+      version         => $version,
+      arch            => $arch,
+      binary_name     => 'jlink',
+      binary_dir      => "${installDir}/bin",
+      binary_link_dir => '/usr/bin',
+    }
+
+    # Registers jmod using update-alternatives
+    java::alternative { "java-alternatives-jmod-${vendor}-${version}-${arch}":
+      defaultJava     => $defaultJava,
+      vendor          => $vendor,
+      version         => $version,
+      arch            => $arch,
+      binary_name     => 'jmod',
+      binary_dir      => "${installDir}/bin",
+      binary_link_dir => '/usr/bin',
+    }
+
+    # Registers jshell using update-alternatives
+    java::alternative { "java-alternatives-jshell-${vendor}-${version}-${arch}":
+      defaultJava     => $defaultJava,
+      vendor          => $vendor,
+      version         => $version,
+      arch            => $arch,
+      binary_name     => 'jshell',
+      binary_dir      => "${installDir}/bin",
+      binary_link_dir => '/usr/bin',
+    }
   }
 
 }
