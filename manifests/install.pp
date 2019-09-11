@@ -69,7 +69,7 @@ define java::install (
   }
 
   $installDir = "${java::params::installRootDir}/jdk-${vendor}-${version}-${arch}"
-  
+
   $major = inline_template('<%= scope.lookupvar(\'version\').split(\'-\')[0].gsub(\'.\', \'_\') %>')
   # convert $major value to an integer
   $majora = scanf($major, "%i") 
@@ -84,7 +84,7 @@ define java::install (
       $jdk_dir = "jdk-${major}-${vendor}-${arch}"
     }
     # Java > 6 are using the vendor oracle
-    /(oracle)/ : {
+    /(oracle|openjdk)/ : {
       if ( $majori < 9 ) {
         $file    = "jdk-${version}-linux-${arch}.tar.gz"
       } else {
@@ -272,7 +272,7 @@ define java::install (
     binary_link_dir => '/usr/bin',
   }
 
-  if $majori < 9 {
+  if $majori < 9 and vendor != 'openjdk' {
     # Registers orbd using update-alternatives
     java::alternative { "java-alternatives-orbd-${vendor}-${version}-${arch}":
       defaultJava     => $defaultJava,
