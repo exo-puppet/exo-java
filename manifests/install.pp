@@ -92,6 +92,10 @@ define java::install (
       }
       $jdk_dir = "jdk-${version}-${vendor}-${arch}"
     }
+    /(openjdk)/ : {
+      $file    = "openjdk-${version}-linux-${arch}.tar.gz"
+      $jdk_dir = "openjdk-${version}-${vendor}-${arch}"
+    }
     default : {
       fail("The ${vendor} vendor is not supported")
     }
