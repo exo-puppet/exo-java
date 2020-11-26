@@ -10,7 +10,7 @@
 # [+editor+]
 #   (OPTIONAL) (default: sun)
 #
-#   this variable allows to select the vendor of the jvm (values: sun (java 6), oracle (java 7+). TODO : ibm, jrockit, openjdk)
+#   this variable allows to select the vendor of the jvm (values: sun (java 6), oracle (java 7+). TODO : ibm, jrockit)
 #
 # [+version+]
 #
@@ -91,6 +91,10 @@ define java::install (
         $file    = "jdk-${version}_linux-${arch}_bin.tar.gz"
       }
       $jdk_dir = "jdk-${version}-${vendor}-${arch}"
+    }
+    /(openjdk)/ : {
+      $file    = "openjdk-${version}_linux-${arch}_bin.tar.gz"
+      $jdk_dir = "openjdk-${version}-${vendor}-${arch}"
     }
     default : {
       fail("The ${vendor} vendor is not supported")
@@ -228,17 +232,6 @@ define java::install (
     binary_link_dir => '/usr/bin',
   }
 
-  # Registers pack200 using update-alternatives
-  java::alternative { "java-alternatives-pack200-${vendor}-${version}-${arch}":
-    defaultJava     => $defaultJava,
-    vendor          => $vendor,
-    version         => $version,
-    arch            => $arch,
-    binary_name     => 'pack200',
-    binary_dir      => "${installDir}/bin",
-    binary_link_dir => '/usr/bin',
-  }
-
   # Registers rmid using update-alternatives
   java::alternative { "java-alternatives-rmid-${vendor}-${version}-${arch}":
     defaultJava     => $defaultJava,
@@ -261,15 +254,29 @@ define java::install (
     binary_link_dir => '/usr/bin',
   }
 
-  # Registers unpack200 using update-alternatives
-  java::alternative { "java-alternatives-unpack200-${vendor}-${version}-${arch}":
-    defaultJava     => $defaultJava,
-    vendor          => $vendor,
-    version         => $version,
-    arch            => $arch,
-    binary_name     => 'unpack200',
-    binary_dir      => "${installDir}/bin",
-    binary_link_dir => '/usr/bin',
+  if $majori < 14 {
+    # Registers unpack200 using update-alternatives
+    # Deprecated since JDK 11 https://openjdk.java.net/jeps/367
+    java::alternative { "java-alternatives-unpack200-${vendor}-${version}-${arch}":
+      defaultJava     => $defaultJava,
+      vendor          => $vendor,
+      version         => $version,
+      arch            => $arch,
+      binary_name     => 'unpack200',
+      binary_dir      => "${installDir}/bin",
+      binary_link_dir => '/usr/bin',
+    }
+    # Registers pack200 using update-alternatives
+    # Deprecated since JDK 11 https://openjdk.java.net/jeps/367
+    java::alternative { "java-alternatives-pack200-${vendor}-${version}-${arch}":
+      defaultJava     => $defaultJava,
+      vendor          => $vendor,
+      version         => $version,
+      arch            => $arch,
+      binary_name     => 'pack200',
+      binary_dir      => "${installDir}/bin",
+      binary_link_dir => '/usr/bin',
+    }
   }
 
   if $majori < 9 {
