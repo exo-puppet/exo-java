@@ -10,7 +10,7 @@
 # [+editor+]
 #   (OPTIONAL) (default: sun)
 #
-#   this variable allows to select the vendor of the jvm (values: sun (java 6), oracle (java 7+). TODO : ibm, jrockit, openjdk)
+#   this variable allows to select the vendor of the jvm (values: sun (java 6), oracle (java 7+). TODO : ibm, jrockit)
 #
 # [+version+]
 #
