@@ -93,7 +93,7 @@ define java::install (
       $jdk_dir = "jdk-${version}-${vendor}-${arch}"
     }
     /(openjdk)/ : {
-      $file    = "openjdk-${version}-linux-${arch}.tar.gz"
+      $file    = "openjdk-${version}_linux-${arch}_bin.tar.gz"
       $jdk_dir = "openjdk-${version}-${vendor}-${arch}"
     }
     default : {
