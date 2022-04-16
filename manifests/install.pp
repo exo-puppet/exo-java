@@ -232,17 +232,6 @@ define java::install (
     binary_link_dir => '/usr/bin',
   }
 
-  # Registers rmid using update-alternatives
-  java::alternative { "java-alternatives-rmid-${vendor}-${version}-${arch}":
-    defaultJava     => $defaultJava,
-    vendor          => $vendor,
-    version         => $version,
-    arch            => $arch,
-    binary_name     => 'rmid',
-    binary_dir      => "${installDir}/bin",
-    binary_link_dir => '/usr/bin',
-  }
-
   # Registers rmiregistry using update-alternatives
   java::alternative { "java-alternatives-rmiregistry-${vendor}-${version}-${arch}":
     defaultJava     => $defaultJava,
@@ -252,6 +241,34 @@ define java::install (
     binary_name     => 'rmiregistry',
     binary_dir      => "${installDir}/bin",
     binary_link_dir => '/usr/bin',
+  }
+
+  if $majori < 16 {
+    # Registers jaotc using update-alternatives
+    # Removed since JDK 16 https://openjdk.java.net/jeps/410
+    java::alternative { "java-alternatives-jaotc-${vendor}-${version}-${arch}":
+      defaultJava     => $defaultJava,
+      vendor          => $vendor,
+      version         => $version,
+      arch            => $arch,
+      binary_name     => 'jaotc',
+      binary_dir      => "${installDir}/bin",
+      binary_link_dir => '/usr/bin',
+    }
+  }
+  
+  if $majori < 15 {
+    # Registers rmid using update-alternatives
+    # Removed since JDK 15 https://openjdk.java.net/jeps/407
+    java::alternative { "java-alternatives-rmid-${vendor}-${version}-${arch}":
+      defaultJava     => $defaultJava,
+      vendor          => $vendor,
+      version         => $version,
+      arch            => $arch,
+      binary_name     => 'rmid',
+      binary_dir      => "${installDir}/bin",
+      binary_link_dir => '/usr/bin',
+    }
   }
 
   if $majori < 14 {
@@ -326,17 +343,6 @@ define java::install (
 
   } else {
     # Declare new jdk >= 9 tools
-
-    # Registers jaotc using update-alternatives
-    java::alternative { "java-alternatives-jaotc-${vendor}-${version}-${arch}":
-      defaultJava     => $defaultJava,
-      vendor          => $vendor,
-      version         => $version,
-      arch            => $arch,
-      binary_name     => 'jaotc',
-      binary_dir      => "${installDir}/bin",
-      binary_link_dir => '/usr/bin',
-    }
 
     # Registers jdeprscan using update-alternatives
     java::alternative { "java-alternatives-jdeprscan-${vendor}-${version}-${arch}":
